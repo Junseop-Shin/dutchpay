@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { RecoilRoot } from "recoil";
 import ExpenseMain from "./ExpenseMain";
 import userEvent from "@testing-library/user-event";
@@ -70,5 +70,54 @@ describe('비용 정산 메인 페이지', () => {
             expect(payerErrorMessage).toHaveAttribute('data-valid', 'true');            
             expect(amountErrorMessage).toHaveAttribute('data-valid', 'true');
         });
+    });
+});
+
+describe('비용 리스트 컴포넌트', () => {
+    test('비용 리스트 컴포넌트가 렌더링 되는가', () => {
+        renderComponent();
+        const expenseListComponent = screen.getByTestId('expenseList');
+        expect(expenseListComponent).toBeInTheDocument();
+    });
+});
+
+describe('정산 결과 컴포넌트', () => {
+    test('정산 결과 컴포넌트가 렌더링 되는가', () => {
+        renderComponent();
+        const resultComponent = screen.getByText(/정산은 이렇게/i);
+        expect(resultComponent).toBeInTheDocument();
+    });
+});
+
+describe('새로운 비용이 추가되었을 때', () => {
+    const addNewExpense = async () => {
+        const {dateInput, descInput, amountInput, payerInput, addButton} = renderComponent();
+        await userEvent.type(dateInput, '2023-03-14');
+        await userEvent.type(descInput, '장보기');
+        await userEvent.type(amountInput, '30000');
+        await userEvent.selectOptions(payerInput, '준섭');
+        await userEvent.click(addButton);
+    }
+    test('날짜, 내용, 결제자, 금액 데이터 정산 리스트에 추가 된다', async () => {
+        await addNewExpense();
+        const expenseListComponent = screen.getByTestId('expenseList');
+
+        const dateValue = within(expenseListComponent).getByText('2023-03-14');
+        expect(dateValue).toBeInTheDocument();
+        const descValue = within(expenseListComponent).getByText('장보기');
+        expect(descValue).toBeInTheDocument();
+        const amountValue = within(expenseListComponent).getByText('30000 원');
+        expect(amountValue).toBeInTheDocument();
+        const payerValue = within(expenseListComponent).getByText('준섭');
+        expect(payerValue).toBeInTheDocument();
+    });
+
+    test('정산 결과가 업데이트 된다', async () => {
+        await addNewExpense();
+        const totalText = screen.getByText(/2명 - 총 30000원 지출/i);
+        expect(totalText).toBeInTheDocument();
+        
+        const transactionText = screen.getByText(/유화가 준섭에게 15000원/i);
+        expect(transactionText).toBeInTheDocument();
     });
 });

@@ -1,4 +1,4 @@
-import CenteredOverlayForm from './CenteredOverlayForm';
+import CenteredOverlayForm from './shared/CenteredOverlayForm';
 import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { InputTags } from 'react-bootstrap-tagsinput';

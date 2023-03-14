@@ -33,7 +33,6 @@ export const AddExpenseForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const form = event.currentTarget;
         if (checkFormValidity()) {
             const newExpense = {
                 date,
@@ -125,7 +124,7 @@ export const AddExpenseForm = () => {
     );
 }
 
-const StyledWrapper = styled.div`
+export const StyledWrapper = styled.div`
     padding: 50px;
     background-color: #683BA1;
     box-shadow: 3px 0px 4px rgba(0, 0, 0, 0.25);
@@ -151,7 +150,7 @@ const StyledFormGroup = styled(Form.Group)`
     }
 `;
 
-const StyledTitle = styled.h3`
+export const StyledTitle = styled.h3`
     color: #FFFBFB;
     text-align: center;
     font-weight: 700;
