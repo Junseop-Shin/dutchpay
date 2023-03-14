@@ -1,0 +1,12 @@
+import CenteredOverlayForm from './CenteredOverlayForm';
+
+const AddMembers = () => {
+    return (
+        <div>
+            AddMembers
+            <CenteredOverlayForm />
+        </div>
+    );
+}
+
+export default AddMembers
