@@ -1,13 +1,27 @@
-import { Container } from 'react-bootstrap';
+import { Container, Row, Button, Form } from 'react-bootstrap';
 import styled from 'styled-components';
 import { OverlayWrapper } from './shared/OverlayWrapper';
 
-const CenteredOverlayForm = ({children}) => {
+const CenteredOverlayForm = ({title, children, validated, handleSubmit}) => {
     return (
         <StyledCentralizedContainer>
             <StyledHeader>Dutch Pay</StyledHeader>
             <OverlayWrapper>
-                {children}
+            <Container>
+                <Form noValidate validated={validated} onSubmit={handleSubmit}>
+                    <StyledCentralizedContents>
+                        <Row className='align-items-start'>
+                            <StyledTitle>{title}</StyledTitle>
+                        </Row>
+                        <Row className='align-items-center'>
+                            {children}
+                        </Row>
+                        <Row className='align-items-end'>
+                            <StyledSubmitButton type='submit'>저장</StyledSubmitButton>
+                        </Row>
+                    </StyledCentralizedContents>
+                </Form>
+            </Container>
             </OverlayWrapper>
         </StyledCentralizedContainer>
     );
@@ -27,6 +41,33 @@ const StyledCentralizedContainer = styled(Container)`
     align-items: center;
     padding: 0px;
     gap: 10px;
+`;
+
+export const StyledTitle = styled.h2`
+    font-weight: 700;
+    line-height: 35px;
+    text-align: right;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+`;
+
+export const StyledCentralizedContents = styled(Row)`
+    height: 60vh;
+    justify-content: center;
+    align-items: center;
+`;
+
+export const StyledSubmitButton = styled(Button).attrs({
+    type: 'submit'
+})`
+    background-color: #6610F2;
+    border-radius: 8px;
+    border: none;
+
+    &:hover {
+        background-color: #6610F2;
+        filter: brightness(80%);
+    }
 `;
 
 export default CenteredOverlayForm
