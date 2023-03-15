@@ -5,15 +5,21 @@ import { InputTags } from 'react-bootstrap-tagsinput';
 import { groupMembersState } from '../state/groupMembers';
 import { groupNameState } from '../state/groupName';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from 'routes';
 
 const AddMembers = () => {
     const [groupMembers, setGroupMembers] = useRecoilState(groupMembersState);
     const groupName = useRecoilValue(groupNameState);
     const [validated, setValidated] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = (event) => {
         event.preventDefault();
         setValidated(true);
+        if (groupMembers.length > 0) {
+            navigate(ROUTES.EXPENSE_MAIN);
+        }
     };
 
     const header = `${groupName} 그룹에 속한 사람들의 이름을 모두 적어주세요.`
