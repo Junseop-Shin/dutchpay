@@ -65,6 +65,8 @@ export const calculateMinimulTransaction = (expenses, members, splitAmount) => {
             toReceive.amount += amountToSend;
             right--;
         }
+
+        sortedMembersToPay.sort((a,b) => a.amount - b.amount);
     }
 
     return minTransactions;
@@ -73,7 +75,7 @@ export const calculateMinimulTransaction = (expenses, members, splitAmount) => {
 export const SettlementSummary = () => {
     const expenses = useRecoilValue(expensesState);
     const members = useRecoilValue(groupMembersState);
-    const totalExpenseAmount = expenses.reduce((prevExpense, curExpense) => prevExpense + curExpense.amount, 0);
+    const totalExpenseAmount = expenses.reduce((prevExpense, curExpense) => prevExpense + Number(curExpense.amount), 0);
     const groupMembersCount = members.length;
     const splitAmount = totalExpenseAmount/groupMembersCount;
 
@@ -91,9 +93,9 @@ export const SettlementSummary = () => {
                         <span>한 사람당 {splitAmount} 원</span>
                     </StyledSummary>
                     <StyledUl>
-                        {minimunTransaction.map(({receiver, sender, amount}, idx) => (
+                        {minimunTransaction.map(({receiver, payer, amount}, idx) => (
                             <li key={`transaction-${idx}`}>
-                                <span>{sender}가 {receiver}에게 {amount}원 보내기</span>
+                                <span>{payer}가 {receiver}에게 {amount}원 보내기</span>
                             </li>
                         ))}
                     </StyledUl>
@@ -108,7 +110,8 @@ const StyledUl = styled.ul`
     font-weight: 600;
     line-height: 200%;
     text-align: center;
-
+    color: #FFFBFB;
+    
     list-style-type: disclosure-closed;
     li::marker {
         animation: blinker 1.5s linear infinite;
@@ -116,11 +119,13 @@ const StyledUl = styled.ul`
 
     @keyframes blinker {
         50% {
-            oparcity: 0;
+            opacity: 0;
         }
     }
 `;
 
 const StyledSummary = styled.div`
+    color: #FFFBFB;
     margin-top: 31px;
+    text-align: center;
 `;
