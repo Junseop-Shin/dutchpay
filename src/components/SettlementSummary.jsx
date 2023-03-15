@@ -1,8 +1,12 @@
 import { useRecoilValue } from "recoil";
 import { expensesState } from "../state/expenses";
-import { groupMembersState } from "state/groupMembers";
+import { groupMembersState } from "../state/groupMembers";
 import styled from "styled-components";
 import { StyledTitle, StyledWrapper } from "./AddExpenseForm";
+import { Download } from "react-bootstrap-icons";
+import { toPng } from "html-to-image";
+import { groupNameState } from "../state/groupName";
+import { useRef } from "react";
 
 export const calculateMinimulTransaction = (expenses, members, splitAmount) => {
     const minTransactions = [];
@@ -73,17 +77,38 @@ export const calculateMinimulTransaction = (expenses, members, splitAmount) => {
 }
 
 export const SettlementSummary = () => {
+    const wrapperElement = useRef(null);
     const expenses = useRecoilValue(expensesState);
     const members = useRecoilValue(groupMembersState);
+    const groupName = useRecoilValue(groupNameState);
     const totalExpenseAmount = expenses.reduce((prevExpense, curExpense) => prevExpense + Number(curExpense.amount), 0);
     const groupMembersCount = members.length;
     const splitAmount = totalExpenseAmount/groupMembersCount;
 
-    //TODO: 핵심 로직 구현
     const minimunTransaction = calculateMinimulTransaction(expenses, members, splitAmount);
 
+    const handleDownload = () => {
+        if (wrapperElement.current === null) {
+            return;
+        }
+
+        toPng(wrapperElement.current, {
+            filter: (node) => node.tagName !== 'BUTTON',
+        })
+        .then((dataUrl) => {
+            const link = document.createElement('a');
+            link.download = `${groupName}_정산.png`;
+            link.href = dataUrl;
+
+            link.click();
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }
+
     return (
-        <StyledWrapper>
+        <StyledWrapper ref={wrapperElement} style={{position: 'relative'}}>
             <StyledTitle>2. 정산은 이렇게!</StyledTitle>
             { totalExpenseAmount > 0 && groupMembersCount > 0 && (
                 <>
@@ -99,6 +124,7 @@ export const SettlementSummary = () => {
                             </li>
                         ))}
                     </StyledUl>
+                    <StyledDownload onClick={handleDownload} data-testid='btn-download'/>
                 </>
             )}
         </StyledWrapper>
@@ -128,4 +154,16 @@ const StyledSummary = styled.div`
     color: #FFFBFB;
     margin-top: 31px;
     text-align: center;
+`;
+
+const StyledDownload = styled(Download)`
+    color: #FFFBFB;
+    font-size: 25px;
+    position: absolute;
+    top: 25px;
+    right: 25px;
+
+    &:hover, &:active {
+        color: #59359A;
+    }
 `;

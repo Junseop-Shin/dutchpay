@@ -23,7 +23,7 @@ export const ExpenseTable = () => {
                             <td>{date}</td>
                             <td>{desc}</td>
                             <td>{payer}</td>
-                            <td>{amount} 원</td>
+                            <td>{`${amount} 원`}</td>
                         </tr>
                     ))}
                 </StyledTBody>
