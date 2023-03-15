@@ -108,7 +108,7 @@ export const SettlementSummary = () => {
     }
 
     return (
-        <StyledWrapper ref={wrapperElement} style={{position: 'relative'}}>
+        <StyledWrapper ref={wrapperElement} style={{position: 'relative', marginBottom: '40px'}}>
             <StyledTitle>2. 정산은 이렇게!</StyledTitle>
             { totalExpenseAmount > 0 && groupMembersCount > 0 && (
                 <>
