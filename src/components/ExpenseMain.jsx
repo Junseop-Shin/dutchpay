@@ -44,7 +44,7 @@ const RightPane = () => {
     const groupName = useRecoilValue(groupNameState);
     return (
         <StyledRightPaneWrapper>
-            <Row>
+            <Row style={{marginBottom: '4vh'}}>
                 <StyledGroupName>{groupName || '그룹 이름'}</StyledGroupName>
             </Row>
             <Row>

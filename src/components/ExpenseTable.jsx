@@ -1,13 +1,12 @@
 import { useRecoilValue } from "recoil";
 import { expensesState } from "../state/expenses";
 import { Table } from "react-bootstrap";
-import { OverlayWrapper } from "./shared/OverlayWrapper";
 import styled from "styled-components";
 
 export const ExpenseTable = () => {
     const expenses = useRecoilValue(expensesState);
     return (
-        <OverlayWrapper minHeight={"73vh"}>
+        <StyledWrapper>
             <Table data-testid='expenseList' borderless hover responsive>
                 <StyledTHead>
                     <tr>
@@ -28,9 +27,20 @@ export const ExpenseTable = () => {
                     ))}
                 </StyledTBody>
             </Table>
-        </OverlayWrapper>
+        </StyledWrapper>
     );
 }
+const StyledWrapper = styled.div`
+    padding: '5vw';
+    border-radius: 15px;
+    background-color: white;
+    filter: drop-shadow(0px 4px 4px gray);
+    min-height: 140vh;
+
+    @media (max-width: 500px) {
+        min-height: 50vh;
+    }
+`;
 
 const StyledTHead = styled.thead`
     color: #683DA6;
@@ -49,5 +59,11 @@ const StyledTBody = styled.tbody`
         font-weight: 400;
         font-size: 24px;
         line-height: 59px;
+        text-align: center;
+        
+        @media (max-width: 500px) {
+            font-size: 18px;
+            line-height: 30px;
+        }
     }
 `;
