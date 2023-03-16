@@ -4,7 +4,7 @@ import { Form } from 'react-bootstrap';
 import { useSetRecoilState } from 'recoil';
 import { groupNameState } from '../state/groupName';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from 'routes';
+import { ROUTES } from '../routes';
 
 const CreateGroup = () => {
     const [validated, setValidated] = useState(false);

@@ -2,12 +2,15 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RecoilRoot } from "recoil";
 import AddMembers from "./AddMembers";
+import { BrowserRouter } from "react-router-dom";
 
 const renderComponent = () => {
     render(
-        <RecoilRoot>
-            <AddMembers />
-        </RecoilRoot>
+        <BrowserRouter>
+            <RecoilRoot>
+                <AddMembers />
+            </RecoilRoot>
+        </BrowserRouter>
     );
 
     const input = screen.getByTestId('input-member-names');

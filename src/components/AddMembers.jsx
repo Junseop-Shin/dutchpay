@@ -6,7 +6,7 @@ import { groupMembersState } from '../state/groupMembers';
 import { groupNameState } from '../state/groupName';
 import styled from 'styled-components';
 import { Form, useNavigate } from 'react-router-dom';
-import { ROUTES } from 'routes';
+import { ROUTES } from '../routes';
 
 const AddMembers = () => {
     const [groupMembers, setGroupMembers] = useRecoilState(groupMembersState);
