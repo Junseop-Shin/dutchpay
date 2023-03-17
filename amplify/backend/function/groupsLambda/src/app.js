@@ -6,15 +6,20 @@ or in the "license" file accompanying this file. This file is distributed on an 
 See the License for the specific language governing permissions and limitations under the License.
 */
 
-const AWS = require("aws-sdk");
 const awsServerlessExpressMiddleware = require("aws-serverless-express/middleware");
 const bodyParser = require("body-parser");
 const express = require("express");
-const { v1: uuidv1 } = require("uuid");
+const uuidv1 = require("uuid").v1;
+const {
+  DynamoDBDocumentClient,
+  UpdateCommand,
+  GetCommand,
+  PutCommand,
+} = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 
-AWS.config.update({ region: process.env.TABLE_REGION });
-
-const dynamodb = new AWS.DynamoDB.DocumentClient();
+const ddbClient = new DynamoDBClient({ region: process.env.TABLE_REGION });
+const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
 let tableName = "groups";
 if (process.env.ENV && process.env.ENV !== "NONE") {
@@ -38,40 +43,80 @@ app.use(function (req, res, next) {
 });
 
 /*****************************************
- * HTTP Get method for get single object * - 그룹 정보 읽기 API
+ * HTTP Get method for get single object -- 그룹 정보 읽기 API *
  *****************************************/
-
-app.get(path + hashKeyPath, function (req, res) {
+app.get(path + hashKeyPath, async function (req, res) {
   let getItemParams = {
     TableName: tableName,
-    Key: { [partitionKeyName]: req.params[partitionKeyName] },
+    Key: {
+      [partitionKeyName]: req.params[partitionKeyName],
+    },
   };
 
-  dynamodb.get(getItemParams, (err, data) => {
-    if (err) {
-      res.statusCode = 500;
-      res.json({ error: "Could not load items: " + err.message });
-    } else if (Object.keys(data).length === 0) {
+  try {
+    const result = await dynamodb.send(new GetCommand(getItemParams));
+    if (!result.Item) {
       res.statusCode = 404;
-      res.json({ error: "item not found" });
+      res.json({ error: "Item not found" });
     } else {
-      res.json({ data: data.Item });
+      res.statusCode = 200;
+      res.json({ data: result });
     }
-  });
+  } catch (error) {
+    res.statusCode = 500;
+    res.json({ error: "Could not load items: " + error.message });
+  }
+});
+
+/************************************
+ * HTTP put method for adding an expense to the group - 결제 통화 설정 API *
+ *************************************/
+app.put(`${path}${hashKeyPath}/currencyCode`, async function (req, res) {
+  const guid = req.params[partitionKeyName];
+  const { currencyCode } = req.body;
+
+  if (!currencyCode) {
+    res.statusCode = 400;
+    res.json({ error: "Invalid currency code" });
+    return;
+  }
+
+  let updateItemParams = {
+    TableName: tableName,
+    Key: {
+      [partitionKeyName]: guid,
+    },
+    UpdateExpression: "SET currencyCode = :currencyCode",
+    ExpressionAttributeValues: {
+      ":currencyCode": currencyCode,
+    },
+  };
+
+  try {
+    const result = await dynamodb.send(new UpdateCommand(updateItemParams));
+    res.statusCode = 200;
+    res.json({ data: result.Item });
+  } catch (error) {
+    res.statusCode = 500;
+    res.json({ error });
+  }
 });
 
 /************************************
  * HTTP put method for adding an expense to the group - 비용 추가 API *
- * groups/:{guid}/expenses
  *************************************/
-
-app.put(`${path}${hashKeyPath}/expenses`, function (req, res) {
+app.put(`${path}${hashKeyPath}/expenses`, async function (req, res) {
   const guid = req.params[partitionKeyName];
   const { expense } = req.body;
 
-  if (expense == null || !expense.payer || !expense.amount) {
+  if (
+    expense === null ||
+    expense === undefined ||
+    !expense.payer ||
+    !expense.amount
+  ) {
     res.statusCode = 400;
-    res.json({ error: "invalid expense object" });
+    res.json({ error: "Invalid expense object" });
     return;
   }
 
@@ -88,30 +133,33 @@ app.put(`${path}${hashKeyPath}/expenses`, function (req, res) {
     },
   };
 
-  console.log(updateItemParams);
-  dynamodb.update(updateItemParams, (err, data) => {
-    if (err) {
-      res.statusCode = 500;
-      res.json({ error: err });
-    } else {
-      res.statusCode = 200;
-      res.json({ data });
-    }
-  });
+  try {
+    const result = await dynamodb.send(new UpdateCommand(updateItemParams));
+    res.statusCode = 200;
+    res.json({ data: result.Item });
+  } catch (error) {
+    res.statusCode = 500;
+    res.json({ error });
+  }
 });
 
 /************************************
  * HTTP put method for adding members to the group - 멤버 추가 API *
- * groups/:{guid}/members
  *************************************/
-
-app.put(`${path}${hashKeyPath}/members`, function (req, res) {
+app.put(`${path}${hashKeyPath}/members`, async function (req, res) {
   const guid = req.params[partitionKeyName];
   const { members } = req.body;
 
-  if (members == null || !Array.isArray(members) || members.length === 0) {
+  if (
+    members === null ||
+    members === undefined ||
+    !Array.isArray(members) ||
+    members.length === 0
+  ) {
     res.statusCode = 400;
-    res.json({ error: "invalid members" });
+    res.json({
+      error: "invalid members",
+    });
     return;
   }
 
@@ -126,26 +174,29 @@ app.put(`${path}${hashKeyPath}/members`, function (req, res) {
     },
   };
 
-  dynamodb.update(updateItemParams, (err, data) => {
-    if (err) {
-      res.statusCode = 500;
-      res.json({ error: err });
-    } else {
-      res.statusCode = 200;
-      res.json({ data });
-    }
-  });
+  try {
+    const result = await dynamodb.send(new UpdateCommand(updateItemParams));
+    res.statusCode = 200;
+    res.json({ data: result.Item });
+  } catch (error) {
+    res.statusCode = 500;
+    res.json({ error });
+  }
 });
 
 /************************************
- * HTTP post method for creting a grouop - 그룹 생성 API*
+ * HTTP post method for creating a group - 그룹 생성 API *
  *************************************/
 
-app.post(path, function (req, res) {
+app.post(path, async function (req, res) {
   const { groupName } = req.body;
   const guid = uuidv1();
 
-  if (groupName == null || groupName.trim().length === 0) {
+  if (
+    groupName === null ||
+    groupName === undefined ||
+    groupName.trim().length === 0
+  ) {
     res.statusCode = 400;
     res.json({ error: "invalid group name" });
     return;
@@ -158,14 +209,14 @@ app.post(path, function (req, res) {
       guid: guid,
     },
   };
-  dynamodb.put(putItemParams, (err, data) => {
-    if (err) {
-      res.statusCode = 500;
-      res.json({ error: err });
-    } else {
-      res.json({ data: { guid: guid } });
-    }
-  });
+  try {
+    const result = await dynamodb.send(new PutCommand(putItemParams));
+    res.statusCode = 200;
+    res.json({ data: result.Item?.guid });
+  } catch (error) {
+    res.statusCode = 500;
+    res.json({ error });
+  }
 });
 
 app.listen(3000, function () {
