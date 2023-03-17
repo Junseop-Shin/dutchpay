@@ -6,8 +6,11 @@ import { useRecoilValue } from "recoil";
 import { groupNameState } from "../state/groupName";
 import { SettlementSummary } from "./SettlementSummary";
 import { ServiceLogo } from './shared/ServiceLogo';
+import { useGroupData } from "hooks/useGroupData";
 
 const ExpenseMain = () => {
+    useGroupData();
+    
     return (
         <Container fluid>
             <Row>

@@ -1,32 +1,47 @@
 import CenteredOverlayForm from './shared/CenteredOverlayForm';
 import { useCallback, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { InputTags } from 'react-bootstrap-tagsinput';
 import { groupMembersState } from '../state/groupMembers';
-import { groupNameState } from '../state/groupName';
 import styled from 'styled-components';
 import { Form, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../routes';
+import { ROUTE_UTILS } from '../routes';
+import { API } from 'aws-amplify';
+import { useGroupData } from 'hooks/useGroupData';
 
 const AddMembers = () => {
-    const [groupMembers, setGroupMembers] = useRecoilState(groupMembersState);
-    const groupName = useRecoilValue(groupNameState);
+    const setGroupMembers = useSetRecoilState(groupMembersState);
     const [validated, setValidated] = useState(false);
     const [groupMembersString, setGroupMembersString] = useState('');
     const navigate = useNavigate();
+    const { groupMembers, groupId, groupName} = useGroupData();
 
     const isSamsungBrowser = useCallback(() => {
         return window.navigator.userAgent.includes('SAMSUNG');
     }, []);
 
+    const saveMembers = () => {
+        API.put('groupsApi', `/groups/${groupId}/members`, {
+            body: {
+                members: groupMembers,
+            }
+        })
+        .then(_response => {
+            navigate(ROUTE_UTILS.EXPENSE_MAIN(groupId));
+        })
+        .catch(_error => {
+            alert("올바르지 않은 멤버입니다.");
+        });
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault();
         setValidated(true);
         if (groupMembers.length > 0) {
-            navigate(ROUTES.EXPENSE_MAIN);
+            saveMembers();
         } else if (isSamsungBrowser() && groupMembersString.length > 0) {
             setGroupMembers(groupMembersString.split(','));
-            navigate(ROUTES.EXPENSE_MAIN);
+            saveMembers();
         }
     };
 
@@ -40,13 +55,15 @@ const AddMembers = () => {
             {/* TODO: InputTags가 동작하지 않는 환경(삼성 브라우저)에서는 컴마(,)로 구분 */}
             { isSamsungBrowser() ?
                 <Form.Control
-                    data-testId='input-member-names'
+                    value={groupMembers}
+                    data-testid='input-member-names'
                     placeholder='이름 간 컴마(,)로 구분'
                     onChange={(event) => setGroupMembersString(event.target.value)}
                 />
             :
                 <InputTags
-                    data-testId='input-member-names'
+                    value={groupMembers}
+                    data-testid='input-member-names'
                     placeholder='이름 간 띄어쓰기'
                     onTags={(value) => setGroupMembers(value.values)}
                 />

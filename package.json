@@ -5,6 +5,7 @@
   "dependencies": {
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "aws-amplify": "^5.0.20",
     "bootstrap": "^5.2.3",
     "eslint": "^8.35.0",
     "html-to-image": "^1.11.11",
@@ -52,6 +53,7 @@
     "@babel/preset-typescript": "^7.21.0",
     "@testing-library/jest-dom": "^5.16.5",
     "husky": "^8.0.3",
-    "lint-staged": "^13.2.0"
+    "lint-staged": "^13.2.0",
+    "recoil-toolkit": "^0.2.11"
   }
 }

@@ -70,7 +70,7 @@ export const calculateMinimulTransaction = (expenses, members, splitAmount) => {
             right--;
         }
 
-        sortedMembersToPay.sort((a,b) => a.amount - b.amount);
+        // sortedMembersToPay.sort((a,b) => a.amount - b.amount);
     }
 
     return minTransactions;

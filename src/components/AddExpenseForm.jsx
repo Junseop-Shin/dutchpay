@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { groupMembersState } from "../state/groupMembers";
+import { groupIdState } from "../state/groupId";
 import { expensesState } from "../state/expenses";
 import styled from "styled-components";
+import { API } from 'aws-amplify';
 
 export const AddExpenseForm = () => {
     const members = useRecoilValue(groupMembersState);
+    const groupId = useRecoilValue(groupIdState);
     const setExpense = useSetRecoilState(expensesState);
     const [validated, setValidated] = useState(false);
 
@@ -20,6 +23,22 @@ export const AddExpenseForm = () => {
     const [amount, setAmount] = useState(0);
     const [payer, setPayer] = useState(null);
 
+    const saveExpense = (newExpense) => {
+        API.put('groupsApi', `/groups/${groupId}/expenses`, {
+            body: {
+                expense: newExpense,
+            }
+        })
+        .then((_response) => {
+            setExpense(expense => [
+                ...expense,
+                newExpense,
+            ]);
+        })
+        .catch((_error) => {
+            alert("비용 입력을 올바르게 해주세요.");
+        });
+    }
     const checkFormValidity = () => {
         const descValid = desc.length > 0;
         const payerValid = payer !== null;
@@ -41,11 +60,7 @@ export const AddExpenseForm = () => {
                 payer,
             };
 
-            setExpense(expense => [
-                ...expense,
-                newExpense,
-            ]);
-
+            saveExpense(newExpense);
             setDate(todayString);
             setDesc('');
             setAmount(0);
@@ -106,7 +121,6 @@ export const AddExpenseForm = () => {
                     <Col xs={12} lg={6}>
                         <StyledFormGroup>
                             <Form.Select
-                                defaultValue=''
                                 value={payer ? payer : ''}
                                 isValid={isPayerValid}
                                 isInvalid={!isPayerValid && validated}
