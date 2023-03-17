@@ -3,6 +3,9 @@ import userEvent from "@testing-library/user-event";
 import CreateGroup from "./CreateGroup";
 import { RecoilRoot } from "recoil";
 import { BrowserRouter } from "react-router-dom";
+import { API } from "aws-amplify"
+
+API.post = jest.fn().mockResolvedValue({"data":{}})
 
 const renderComponent = () => {
     render(

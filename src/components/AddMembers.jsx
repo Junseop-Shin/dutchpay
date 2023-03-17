@@ -7,7 +7,8 @@ import styled from 'styled-components';
 import { Form, useNavigate } from 'react-router-dom';
 import { ROUTE_UTILS } from '../routes';
 import { API } from 'aws-amplify';
-import { useGroupData } from 'hooks/useGroupData';
+import { useGroupData } from '../hooks/useGroupData';
+import { ShareButton } from './shared/ShareButton';
 
 const AddMembers = () => {
     const setGroupMembers = useSetRecoilState(groupMembersState);
@@ -47,31 +48,33 @@ const AddMembers = () => {
 
     const header = `${groupName} 그룹에 속한 사람들의 이름을 모두 적어주세요.`
     return (
-        <CenteredOverlayForm
-            title={header}
-            validated={validated}
-            handleSubmit={handleSubmit}
-        >
-            {/* TODO: InputTags가 동작하지 않는 환경(삼성 브라우저)에서는 컴마(,)로 구분 */}
-            { isSamsungBrowser() ?
-                <Form.Control
-                    value={groupMembers}
-                    data-testid='input-member-names'
-                    placeholder='이름 간 컴마(,)로 구분'
-                    onChange={(event) => setGroupMembersString(event.target.value)}
-                />
-            :
-                <InputTags
-                    value={groupMembers}
-                    data-testid='input-member-names'
-                    placeholder='이름 간 띄어쓰기'
-                    onTags={(value) => setGroupMembers(value.values)}
-                />
-            }
-            {validated && groupMembers.length === 0 && 
-                (<StyledErrorMessage>그룹 멤버들의 이름을 입력해주세요.</StyledErrorMessage>)
-            }
-        </CenteredOverlayForm>
+        <>
+            <CenteredOverlayForm
+                title={header}
+                validated={validated}
+                handleSubmit={handleSubmit}
+            >
+                {/* TODO: InputTags가 동작하지 않는 환경(삼성 브라우저)에서는 컴마(,)로 구분 */}
+                { isSamsungBrowser() ?
+                    <Form.Control
+                        value={groupMembers}
+                        placeholder='이름 간 컴마(,)로 구분'
+                        onChange={(event) => setGroupMembersString(event.target.value)}
+                    />
+                :
+                    <InputTags
+                        values={groupMembers}
+                        data-testid='input-member-names'
+                        placeholder='이름 간 띄어쓰기'
+                        onTags={(value) => setGroupMembers(value.values)}
+                    />
+                }
+                {validated && groupMembers.length === 0 && 
+                    (<StyledErrorMessage>그룹 멤버들의 이름을 입력해주세요.</StyledErrorMessage>)
+                }
+            </CenteredOverlayForm>
+            <ShareButton />
+        </>
     );
 }
 

@@ -1,4 +1,4 @@
-import { Col, Row, Container } from "react-bootstrap";
+import { Col, Row, Container, Button } from "react-bootstrap";
 import { AddExpenseForm } from "./AddExpenseForm";
 import { ExpenseTable } from "./ExpenseTable";
 import styled from "styled-components";
@@ -6,11 +6,12 @@ import { useRecoilValue } from "recoil";
 import { groupNameState } from "../state/groupName";
 import { SettlementSummary } from "./SettlementSummary";
 import { ServiceLogo } from './shared/ServiceLogo';
-import { useGroupData } from "hooks/useGroupData";
+import { useGroupData } from "../hooks/useGroupData";
+import { ShareButton } from './shared/ShareButton';
 
 const ExpenseMain = () => {
     useGroupData();
-    
+
     return (
         <Container fluid>
             <Row>
@@ -21,6 +22,7 @@ const ExpenseMain = () => {
                     <RightPane />
                 </Col>
             </Row>
+            <ShareButton />
         </Container>
     );
 }

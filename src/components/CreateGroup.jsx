@@ -27,7 +27,6 @@ const CreateGroup = () => {
             navigate(ROUTE_UTILS.ADD_MEMBERS(guid));
         })
         .catch(({ response }) => {
-            const _errorMessage = response.data.error;
             alert("올바르지 않은 그룹명입니다.");
         });
     };

@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { RecoilRoot } from "recoil";
 import AddMembers from "./AddMembers";
 import { BrowserRouter } from "react-router-dom";
+import { API } from "aws-amplify"
+
+API.put = jest.fn().mockResolvedValue({"data":{}})
+API.get = jest.fn().mockResolvedValue({"data":{}})
 
 const renderComponent = () => {
     render(
@@ -44,6 +48,6 @@ describe('그룹 멤버 추가 페이지', () => {
         await userEvent.click(saveButton);
 
         const errorMessage = screen.queryByText('그룹 멤버들의 이름을 입력해주세요.');
-        expect(errorMessage).toBeNull();
+        expect(errorMessage).not.toBeInTheDocument();
     });
 });
